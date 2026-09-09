@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import RobustScaler
 
+#pr para ganhar acesso
 
 def rename_and_remap(df: pd.DataFrame) -> pd.DataFrame:
 
