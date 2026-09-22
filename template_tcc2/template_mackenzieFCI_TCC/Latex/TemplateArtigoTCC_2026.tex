@@ -1,0 +1,342 @@
+%% abtex2-modelo-artigo.tex, v-1.9.7 laurocesar
+%% Copyright 2012-2018 by abnTeX2 group at http://www.abntex.net.br/ 
+%%
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either version 1.3
+%% of this license or (at your option) any later version.
+%% The latest version of this license is in
+%%   http://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of LaTeX
+%% version 2005/12/01 or later.
+%%
+%% This work has the LPPL maintenance status `maintained'.
+%% 
+%% The Current Maintainer of this work is the abnTeX2 team, led
+%% by Lauro César Araujo. Further information are available on 
+%% http://www.abntex.net.br/
+%%
+%% This work consists of the files abntex2-modelo-artigo.tex and
+%% abntex2-modelo-references.bib
+%%
+
+% ------------------------------------------------------------------------
+% ------------------------------------------------------------------------
+% abnTeX2: Modelo de Artigo Acadêmico em conformidade com
+% ABNT NBR 6022:2018: Informação e documentação - Artigo em publicação 
+% periódica científica - Apresentação
+% ------------------------------------------------------------------------
+% ------------------------------------------------------------------------
+
+% ------------------------------------------------------------------------
+% ------------------------------------------------------------------------
+% Este template foi alterado pelo Prof. Dr. Gustavo Scalabrini Sampaio
+% da Faculdade de Computação e Informática (FCI) para atender os
+% trabalhos de conclusão de curso da unidade acadêmica. 2025.
+% ------------------------------------------------------------------------
+% ------------------------------------------------------------------------
+
+\documentclass[
+	% -- opções da classe memoir --
+	article,			% indica que é um artigo acadêmico
+	11pt,				% tamanho da fonte
+	oneside,			% para impressão apenas no recto. Oposto a twoside
+	a4paper,			% tamanho do papel. 
+	% -- opções da classe abntex2 --
+	%chapter=TITLE,		% títulos de capítulos convertidos em letras maiúsculas
+	%section=TITLE,		% títulos de seções convertidos em letras maiúsculas
+	%subsection=TITLE,	% títulos de subseções convertidos em letras maiúsculas
+	%subsubsection=TITLE % títulos de subsubseções convertidos em letras maiúsculas
+	% -- opções do pacote babel --
+	english,			% idioma adicional para hifenização
+	brazil,				% o último idioma é o principal do documento
+	sumario=tradicional
+	]{abntex2}
+
+
+% ---
+% PACOTES
+% ---
+
+% ---
+% Pacotes fundamentais 
+% ---
+\usepackage{lmodern}			% Usa a fonte Latin Modern
+\usepackage[T1]{fontenc}		% Selecao de codigos de fonte.
+\usepackage[utf8]{inputenc}		% Codificacao do documento (conversão automática dos acentos)
+\usepackage{indentfirst}		% Indenta o primeiro parágrafo de cada seção.
+\usepackage{nomencl} 			% Lista de simbolos
+\usepackage{color}				% Controle das cores
+\usepackage{graphicx}			% Inclusão de gráficos
+\usepackage{microtype} 			% Para melhorias de justificação
+\usepackage{hyperref}           % Habilita links e referências
+% ---
+
+% --- Header e Footer ---
+
+
+\setlength{\headheight}{36pt}
+\setlength{\headsep}{10pt}
+
+
+\makepagestyle{meuestilo}
+\makeevenhead{meuestilo}{\includegraphics[height=1.1cm]{FCI.png}}{}{\thepage}
+\makeoddhead {meuestilo}{\includegraphics[height=1.1cm]{FCI.png}}{}{\thepage}
+
+
+\makeheadrule{meuestilo}{\textwidth}{0.4pt}
+
+
+\pagestyle{meuestilo}
+% Para páginas "plain" (como início de capítulo/título):
+\aliaspagestyle{chapter}{meuestilo}
+\aliaspagestyle{plain}{meuestilo}
+
+
+% Pacotes de citações
+% ---
+%\usepackage[brazilian,hyperpageref]{backref}	 % Paginas com as citações na bibl
+\usepackage[alf]{abntex2cite}	% Citações padrão ABNT
+% ---
+
+% ---
+% Configurações do pacote backref
+% Usado sem a opção hyperpageref de backref
+%\renewcommand{\backrefpagesname}{Citado na(s) página(s):~}
+% Texto padrão antes do número das páginas
+%\renewcommand{\backref}{}
+% Define os textos da citação
+%\renewcommand*{\backrefalt}[4]{
+%	\ifcase #1 %
+%		Nenhuma citação no texto.%
+%	\or
+%		Citado na página #2.%
+%	\else
+%		Citado #1 vezes nas páginas #2.%
+%	\fi}%
+% ---
+
+% --- Informações de dados para CAPA e FOLHA DE ROSTO ---
+
+
+\titulo{Título - Estilo de artigo do trabalho de conclusão de curso da FCI}
+\def \theforeigntitle{}
+
+\autor{Nome Aluno Um \textsuperscript{1} 
+\and Nome Aluno Dois \textsuperscript{1}
+\and Nome Aluno Três \textsuperscript{1}
+\and Nome Aluno Quatro \textsuperscript{1}
+\and Nome Professor Orientador \textsuperscript{1,2} \\
+\\ 
+\textsuperscript{1}Faculdade de Computação e Informática (FCI) \\ Universidade Presbiteriana Mackenzie São Paulo, SP – Brasil \\ 
+\\
+\textsuperscript{2}Programa de pós-graduação em Computação Aplicada (quando houver) \\ Universidade Presbiteriana Mackenzie São Paulo, SP – Brasil 
+\\
+\\
+\url{aluno.um, aluno.dois@mackenzista.com.br}
+\\
+\url{professor.orientador@mackenzie.br}}
+
+\data{2026}
+% ---
+
+% ---
+% Configurações de aparência do PDF final
+
+% alterando o aspecto da cor azul
+\definecolor{blue}{RGB}{41,5,195}
+
+% informações do PDF
+\makeatletter
+\let\@fnsymbol\@arabic
+\hypersetup{
+     	%pagebackref=true,
+		%pdftitle={\@title}, 
+		%pdfauthor={\@author},
+    	%pdfsubject={Modelo de artigo científico com abnTeX2},
+	    %pdfcreator={LaTeX with abnTeX2},
+		%pdfkeywords={abnt}{latex}{abntex}{abntex2}{atigo científico}, 
+		colorlinks=true,       		% false: boxed links; true: colored links
+    	linkcolor=blue,          	% color of internal links
+    	citecolor=blue,        		% color of links to bibliography
+    	%filecolor=magenta,         % color of file links
+		urlcolor=blue,
+		%bookmarksdepth=4
+}
+\makeatother
+% --- 
+
+% ---
+% compila o indice
+% ---
+\makeindex
+% ---
+
+% ---
+% Altera as margens padrões
+% ---
+\setlrmarginsandblock{3cm}{3cm}{*}
+\setulmarginsandblock{3cm}{3cm}{*}
+\checkandfixthelayout
+% ---
+
+% --- 
+% Espaçamentos entre linhas e parágrafos 
+% --- 
+
+% O tamanho do parágrafo é dado por:
+\setlength{\parindent}{1.3cm}
+
+% Controle do espaçamento entre um parágrafo e outro:
+\setlength{\parskip}{0.2cm}  % tente também \onelineskip
+
+% Espaçamento simples
+\SingleSpacing
+
+
+% ----
+% Início do documento
+% ----
+\begin{document}
+
+% Seleciona o idioma do documento (conforme pacotes do babel)
+%\selectlanguage{english}
+\selectlanguage{brazil}
+
+% Retira espaço extra obsoleto entre as frases.
+\frenchspacing 
+
+% ----------------------------------------------------------
+% ELEMENTOS PRÉ-TEXTUAIS
+% ----------------------------------------------------------
+
+%---
+%
+% Se desejar escrever o artigo em duas colunas, descomente a linha abaixo
+% e a linha com o texto ``FIM DE ARTIGO EM DUAS COLUNAS''.
+% \twocolumn[    		% INICIO DE ARTIGO EM DUAS COLUNAS
+%
+%---
+
+% página de titulo principal (obrigatório)
+\maketitle
+% titulo em outro idioma (opcional)
+
+
+
+% resumo em português
+\begin{resumoumacoluna}
+\textit{Este meta-artigo descreve o estilo a ser usado na confecção do artigo do trabalho de conclusão de curso da FCI. É solicitada a escrita de resumo e abstract. O resumo deve descrever, de forma sucinta, as principais partes do projeto: contexto, motivação, objetivo, justificativa, metodologia e resultados alcançados. O resumo deve conter de 150 a 250 palavras. O documento deve conter no máximo 20 páginas considerando as referências bibliográficas.}
+ 
+ \vspace{\onelineskip}
+ 
+ \noindent
+ \textbf{Palavras-chave}: artigo científico; norma ABNT; trabalho de conclusão de curso.
+\end{resumoumacoluna}
+
+
+% resumo em inglês
+\renewcommand{\resumoname}{Abstract}
+\begin{resumoumacoluna}
+ \begin{otherlanguage*}{english}
+\textit{This meta-paper describes the style to be used for writing the FCI’s final paper. A “resumo” and abstract are required. The abstract must describe, in a direct form, the main project parts: context, motivation, objective, justification, methodology and results achieved. The abstract must have between 150 to 250 words. The document must contain a maximum of 20 pages, including bibliographical references.}
+
+   \vspace{\onelineskip}
+ 
+   \noindent
+   \textbf{Keywords}: Scientific article; ABNT standards; undergraduate research paper.
+ \end{otherlanguage*}  
+\end{resumoumacoluna}
+
+% ]  				% FIM DE ARTIGO EM DUAS COLUNAS
+% ---
+
+% ----------------------------------------------------------
+% ELEMENTOS TEXTUAIS
+% ----------------------------------------------------------
+\textual
+
+% ----------------------------------------------------------
+% Introdução
+% ----------------------------------------------------------
+\section{Introdução}
+A introdução tem o objetivo de contextualizar a pesquisa e apontar os principais tópicos do trabalho. De forma sucinta, essa seção busca:
+
+\begin{itemize}
+\item Informar ao leitor o contexto do problema de pesquisa;
+\item Apontar os principais conceitos e paradigmas do trabalho;
+\item Atrair a atenção do leitor para o estudo do tema de pesquisa.
+\end{itemize}
+
+Nessa seção, deve ser descrito o problema de pesquisa, evidenciando os fenômenos ou variáveis que se deseja estudar. Além disso, deve ser indicada uma lacuna de pesquisa, traduzida em algo que pode ser melhorado na área de pesquisa. De um outro ponto de vista, pode ser descrita uma situação-problema, descrevendo como uma situação encontrada na prática profissional pode ser resolvida, considerando abordagens mais eficazes do que as observadas no estado da arte.
+
+Após a descrição da motivação para a pesquisa, devem ser descritos o objetivo geral e os objetivos específicos. O objetivo geral deve expressar claramente o que o pesquisador pretende alcançar com a execução da pesquisa. Esse objetivo deve ser apresentado em apenas uma frase, refletindo uma ação. Os objetivos específicos refletem aspectos particulares derivados do objetivo geral; geralmente, da execução dos objetivos específicos obtém-se os resultados esperados para alcançar o objetivo geral da pesquisa. Os objetivos específicos, então, estabelecem os meios de se pesquisar e não a finalidade da pesquisa.
+
+Deve-se ainda, descrever a relevância do trabalho e sua contribuição para a área de pesquisa; justificando, assim, sua elaboração.
+
+Por fim, a estrutura do documento deve ser descrita, apontando em linhas gerais o que cada seção apresenta.
+
+
+\section{Referencial Teórico}
+
+O referencial teórico apresenta a base conceitual relacionada ao problema de pesquisa e aos objetivos do trabalho. Apresenta, portanto, conteúdos teóricos essenciais que ajudam o leitor a entender conceitos importantes e necessários para o correto entendimento do projeto.
+
+Nessa seção, devem ser apresentados tópicos que possibilitem compreender o estado da arte da área de pesquisa. No entanto, não deve ser entendido como um conjunto de sinopses e resumos de artigos ou livros. Portanto, deve ser construído pelo autor de forma fluída e compreensível, sempre indicando como as obras referenciadas contribuíram para o desenvolvimento do projeto.
+
+Recomenda-se que essa seção seja organizada em formato de funil, no sentido de que o tema mais genérico preceda os temas específicos.
+
+
+\section{Metodologia}
+
+A metodologia deve apresentar o tipo de pesquisa realizada (revisão sistemática, qualitativa, quantitativa ou quanti-qualitativa); os métodos e técnicas de pesquisa; os dados que serão utilizados; como os dados foram coletados; e técnicas de tratamento e análise dos dados. Quando for o caso (pesquisa com humanos ou animais), devem ser indicados os preceitos da ética em pesquisa, realizando a submissão do projeto ao Comitê de Ética em Pesquisa.
+
+O objetivo dessa seção é apresentar ao leitor os caminhos que foram percorridos pelo pesquisador de forma que a pesquisa possa ser reproduzida. A seção anterior (referencial teórico) possibilita que as variáveis indicadas durante a descrição da metodologia fossem definidas de forma firme e consistente e possam ser compreendidas nessa seção.
+
+De forma estruturada, a metodologia, portanto, deve apresentar os seguintes tópicos:
+
+\begin{itemize}
+\item Apresentar detalhadamente o tipo de pesquisa e o método utilizado para alcançar o objetivo proposto;
+\item A metodologia adotada deve estar relacionada com os objetivos específicos descritos;
+\item Descrever como os resultados alcançados foram analisados.
+\end{itemize}
+
+
+\section{Resultados e discussão}
+
+Os resultados obtidos com a pesquisa devem ser descritos nessa seção. Recomenda-se o uso de figuras e tabelas para apresentar de forma organizada esses resultados. Se for o caso, as diferenças dos resultados alcançados em comparação com o estado da arte podem ser descritas. Além disso, uma análise crítica dos resultados deve ser conduzida, apontando os pontos positivos e negativos encontrados por meio da metodologia proposta.
+
+\section{Conclusão}
+
+A conclusão não deve apresentar resultados sem acompanhamento do problema de pesquisa e dos objetivos do projeto.
+
+A conclusão deve iniciar com um breve relato do trabalho, relembrando o leitor do problema de pesquisa, dos objetivos e das ferramentas metodológicas. Em seguida, os resultados devem ser sumarizados com o objetivo de responder à questão do problema de pesquisa. As contribuições da pesquisa e suas limitações devem ser pontuadas em sequência. Por fim, devem ser apresentados os possíveis trabalhos futuros que podem ser realizados em uma sequência do próprio projeto ou que podem ser inspirados pelo método ou técnicas propostas.
+
+
+\section{Referências bibliográficas}
+
+As citações e as referências bibliográficas devem seguir as normas definidas pela ABNT - NBR 6023 \cite{abnt2018}. Apenas os trabalhos citados devem ser indicados.
+
+Para citações em linha, em que o autor é citado de forma corrida, deve ser utilizado o estilo considerando o sobrenome dos autores com apenas a primeira letra maiúscula, seguido da data de publicação da obra entre parênteses. Exemplos: Segundo \citeonline{coppin2010}[...]; De acordo com \citeonline{arora2021}[...]; Na visão de \citeonline{russell2021}[...].
+
+Para citações em final de parágrafo, a citação deve ser realizada entre parênteses, considerando o sobrenome do autor completamente em maiúsculo, seguido pela data de publicação. Os autores e as obras devem ser separados por ponto e vírgula (;), já a data deve ser separada por vírgula (,). Exemplos: \cite{szeliski2021}, \cite{russell2021, szeliski2021}, \cite{hameed2019, arora2021, karthik2022}.
+
+% REMOVER APENAS EXEMPLOS DE OUTRAS OBRAS
+\nocite{upm2021}
+\nocite{sato2020}
+% REMOVER
+
+
+
+
+% ----------------------------------------------------------
+% ELEMENTOS PÓS-TEXTUAIS
+% ----------------------------------------------------------
+\postextual
+
+% ----------------------------------------------------------
+% Referências bibliográficas
+% ----------------------------------------------------------
+\bibliography{referencias}
+
+% ----------------------------------------------------------
+
+\end{document}
