@@ -1,8 +1,5 @@
-import joblib
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import RobustScaler
-
 
 def rename_and_remap(df: pd.DataFrame) -> pd.DataFrame:
 
@@ -73,54 +70,47 @@ def create_attributes(df: pd.DataFrame) -> pd.DataFrame:
     data['cogs_to_sales'] = df['cogs'] / df['net_sales']
     data['opex_to_sales'] = df['total_opex'] / df['net_sales']
 
+    feature_columns = data.columns.difference(['company_name', 'year', 'target'])
+    data[feature_columns] = data[feature_columns].replace([np.inf, -np.inf], np.nan)
+    data['financial_data_missing'] = data[feature_columns].isna().all(axis=1).astype(int)
+
     return data
 
-def normalize_attributes(df: pd.DataFrame, feature_columns: list) -> pd.DataFrame:
-
-    df_clean = df.copy()
-
-    # substituindo valores infinitos por NaN
-    df_clean[feature_columns] = df_clean[feature_columns].replace([np.inf, -np.inf], np.nan)
-
-    for col in feature_columns:
-        
-        # inputando valores nulos com a mediana da coluna
-        median_val = df_clean[col].median()
-        df_clean[col] = df_clean[col].fillna(median_val)
-
-        # truncando valores extremos usando os percentis 1 e 99
-        lower_limit = df_clean[col].quantile(0.01)
-        upper_limit = df_clean[col].quantile(0.99)
-        df_clean[col] = df_clean[col].clip(lower=lower_limit, upper=upper_limit)
-
-    return df_clean
+def read_input_data(input_path: str) -> pd.DataFrame:
+    try:
+        return pd.read_csv(input_path, encoding='utf-8-sig', sep=None, engine='python')
+    except UnicodeDecodeError:
+        return pd.read_csv(input_path, encoding='cp1252', sep=None, engine='python')
 
 def run_pipeline(
     input_path: str = 'american_bankruptcy.csv',
     output_path: str = 'processed_data.parquet',
 ):
     print("1. Carregando dados brutos")
-    raw_df = pd.read_csv(input_path)
+    raw_df = read_input_data(input_path)
 
     print("2. Renomeando e remapeando colunas")
     df = rename_and_remap(raw_df)
+
+    untreated_df = df.copy()
+    untreated_df['target'] = (df['status_label'] == 'failed').astype(int)
+    untreated_df = untreated_df.drop(columns=['status_label'])
+    untreated_df.to_parquet('untreated_data.parquet', index=False)
+    
     df = create_attributes(df)
 
-    print("3. Normalizando atributos")
-    feature_columns = df.columns.difference(['company_name', 'year', 'target']).tolist()
-    df = normalize_attributes(df, feature_columns)
-
-    print(f"4. Salvando dados processados em {output_path}")
-    
-    scaler = RobustScaler()
-    df[feature_columns] = scaler.fit_transform(df[feature_columns])
-
+    print(f"3. Salvando atributos sem ajuste global em {output_path}")
     df.to_parquet(output_path, index=False)
-    joblib.dump(scaler, 'robust_scaler.joblib')
 
     print("Pipeline de processamento concluído com sucesso!")
 
 
 if __name__ == "__main__":
-
-    run_pipeline()
+    run_pipeline(
+        input_path='american_bankruptcy.csv',
+        output_path='processed_data.parquet'
+    )
+    run_pipeline(
+        input_path='brazil_bankruptcy.csv',
+        output_path='brazil_processed_data.parquet'
+    )

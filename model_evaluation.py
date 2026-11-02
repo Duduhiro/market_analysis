@@ -17,21 +17,21 @@ from sklearn.metrics import (
     classification_report
 )
 
-def load_evaluation_artifacts(models_dir: str = 'models'):
+def load_evaluation_artifacts(models_dir: str = 'models', prefix: str = 'processed'):
     """Carrega os modelos treinados e os dados de teste salvos."""
     if not os.path.exists(models_dir):
         raise FileNotFoundError(f"Diretório {models_dir} não encontrado. Execute o Módulo 2 primeiro.")
     
     print("-> A carregar conjuntos de teste...")
-    X_test = pd.read_parquet(os.path.join(models_dir, 'X_test.parquet'))
-    y_test_df = pd.read_parquet(os.path.join(models_dir, 'y_test.parquet'))
+    X_test = pd.read_parquet(os.path.join(models_dir, f'{prefix}_X_test.parquet'))
+    y_test_df = pd.read_parquet(os.path.join(models_dir, f'{prefix}_y_test.parquet'))
     y_test = y_test_df.iloc[:, 0]
     
     print("-> A carregar modelos treinados...")
     models = {
-        'Regressão Logística': joblib.load(os.path.join(models_dir, 'model_logistic_regression.joblib')),
-        'Random Forest': joblib.load(os.path.join(models_dir, 'model_random_forest.joblib')),
-        'XGBoost': joblib.load(os.path.join(models_dir, 'model_xgboost.joblib'))
+        'Regressão Logística': joblib.load(os.path.join(models_dir, f'{prefix}_model_logistic_regression.joblib')),
+        'Random Forest': joblib.load(os.path.join(models_dir, f'{prefix}_model_random_forest.joblib')),
+        'XGBoost': joblib.load(os.path.join(models_dir, f'{prefix}_model_xgboost.joblib'))
     }
     
     return models, X_test, y_test
@@ -156,18 +156,18 @@ def generate_shap_analysis(model_xgb, X_test: pd.DataFrame, output_path: str):
     except ImportError:
         print("! Biblioteca 'shap' não instalada. Execute 'pip install shap' para gerar este gráfico.")
 
-def run_evaluation_pipeline(output_dir: str = 'results'):
+def run_evaluation_pipeline(output_dir: str = 'results', prefix: str = 'processed'):
     os.makedirs(output_dir, exist_ok=True)
     
     # 1. Carregar modelos e dados
-    models, X_test, y_test = load_evaluation_artifacts()
+    models, X_test, y_test = load_evaluation_artifacts(prefix=prefix)
     feature_names = X_test.columns.tolist()
     
     # 2. Gerar tabela de métricas
     print("\nCalculando métricas do Benchmark...")
     df_metrics = compute_metrics_benchmark(models, X_test, y_test)
     
-    metrics_csv = os.path.join(output_dir, 'benchmark_metrics.csv')
+    metrics_csv = os.path.join(output_dir, f'{prefix}_benchmark_metrics.csv')
     df_metrics.to_csv(metrics_csv, index=False)
     
     print("\n" + "="*70)
@@ -178,12 +178,13 @@ def run_evaluation_pipeline(output_dir: str = 'results'):
     
     # 3. Gerar gráficos
     print("\nA gerar gráficos de avaliação...")
-    plot_roc_curves(models, X_test, y_test, os.path.join(output_dir, 'roc_curve_comparison.png'))
-    plot_confusion_matrices(models, X_test, y_test, os.path.join(output_dir, 'confusion_matrices.png'))
-    plot_feature_importances(models, feature_names, os.path.join(output_dir, 'feature_importance.png'))
-    generate_shap_analysis(models['XGBoost'], X_test, os.path.join(output_dir, 'shap_summary.png'))
+    plot_roc_curves(models, X_test, y_test, os.path.join(output_dir, f'{prefix}_roc_curve_comparison.png'))
+    plot_confusion_matrices(models, X_test, y_test, os.path.join(output_dir, f'{prefix}_confusion_matrices.png'))
+    plot_feature_importances(models, feature_names, os.path.join(output_dir, f'{prefix}_feature_importance.png'))
+    generate_shap_analysis(models['XGBoost'], X_test, os.path.join(output_dir, f'{prefix}_shap_summary.png'))
     
     print(f"\n✓ Todos os resultados foram exportados para o diretório '{output_dir}/'.")
 
 if __name__ == '__main__':
-    run_evaluation_pipeline()
+    run_evaluation_pipeline(prefix='processed')
+    run_evaluation_pipeline(prefix='brazil')
