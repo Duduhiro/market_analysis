@@ -1,0 +1,4 @@
+Modelo,Acurácia,Precisão,Recall (Sensibilidade),F1-Score,AUC-ROC,Brier Score,Falências Detectadas (TP),Alarmes Falsos (FP)
+Regressão Logística,0.567,0.1045,0.4556,0.1699,0.4984,0.2486,82/180,703
+Random Forest,0.9049,0.5667,0.0944,0.1619,0.726,0.1002,17/180,13
+XGBoost,0.8173,0.2238,0.3556,0.2747,0.7027,0.1387,64/180,222
