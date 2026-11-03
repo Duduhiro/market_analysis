@@ -85,6 +85,7 @@ def read_input_data(input_path: str) -> pd.DataFrame:
 def run_pipeline(
     input_path: str = 'american_bankruptcy.csv',
     output_path: str = 'processed_data.parquet',
+    untreated_output_path: str = 'untreated_data.parquet',
 ):
     print("1. Carregando dados brutos")
     raw_df = read_input_data(input_path)
@@ -95,7 +96,7 @@ def run_pipeline(
     untreated_df = df.copy()
     untreated_df['target'] = (df['status_label'] == 'failed').astype(int)
     untreated_df = untreated_df.drop(columns=['status_label'])
-    untreated_df.to_parquet('untreated_data.parquet', index=False)
+    untreated_df.to_parquet(untreated_output_path, index=False)
     
     df = create_attributes(df)
 
@@ -112,5 +113,6 @@ if __name__ == "__main__":
     )
     run_pipeline(
         input_path='brazil_bankruptcy.csv',
-        output_path='brazil_processed_data.parquet'
+        output_path='brazil_processed_data.parquet',
+        untreated_output_path='brazil_untreated_data.parquet',
     )

@@ -198,5 +198,5 @@ def run_training_pipeline(file: str = 'processed_data.parquet', prefix: str = 'p
 
 if __name__ == '__main__':
     run_training_pipeline('processed_data.parquet', 'processed')
-    # run_training_pipeline('untreated_data.parquet', 'untreated')
+    run_training_pipeline('untreated_data.parquet', 'untreated')
     run_training_pipeline('brazil_processed_data.parquet', 'brazil')

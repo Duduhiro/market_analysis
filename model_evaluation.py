@@ -187,4 +187,5 @@ def run_evaluation_pipeline(output_dir: str = 'results', prefix: str = 'processe
 
 if __name__ == '__main__':
     run_evaluation_pipeline(prefix='processed')
-    run_evaluation_pipeline(prefix='brazil')
+    run_evaluation_pipeline(prefix='untreated')
+    # run_evaluation_pipeline(prefix='brazil')

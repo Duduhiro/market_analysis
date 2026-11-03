@@ -1,58 +1,47 @@
-# Relatório de Progresso Metodológico e Resultados Preliminares
+# Relatório de Progresso Metodológico e Resultados
 
-## 1. Engenharia de Atributos e Pré-processamento
+## 1. Objetivo e preparação dos dados
 
-* **Normalização das Variáveis:** A base norte-americana bruta (*US Company Bankruptcy Prediction*) continha variáveis nominais em dólares ($X_1$ a $X_{18}$). Para viabilizar a comparação com o mercado brasileiro e eliminar distorções de escala monetária, os dados foram transformados em **indicadores financeiros adimensionais** baseados na literatura clássica (Altman, Ohlson, Beaver):
+O projeto avalia modelos de previsão de falência treinados com empresas dos Estados Unidos e sua capacidade de generalização para empresas brasileiras. As variáveis contábeis nominais são convertidas em indicadores financeiros relativos de liquidez, rentabilidade, endividamento e atividade.
 
+O tratamento de dados agora preserva valores ausentes durante a engenharia de atributos, sinaliza linhas sem indicadores financeiros utilizáveis e deixa imputação, truncamento e escala para depois da divisão de treino e teste. Assim, os parâmetros de pré-processamento são ajustados apenas no conjunto de treino.
 
-* *Liquidez:* Liquidez Corrente, Liquidez Seca e Capital de Giro sobre Ativo Total.
+Há uma diferença relevante entre as bases: `X8` (`market_value`) está totalmente ausente na base brasileira. Portanto, `market_val_to_liabilities` não contém informação brasileira e, no experimento atual, é imputado com a mediana aprendida nos dados americanos. Esse resultado deve ser interpretado com cautela; a imputação não recupera o valor de mercado brasileiro.
 
-* *Rentabilidade:* ROA, ROE, Margem Bruta, Margem Líquida e Margem Operacional.
+## 2. Benchmark interno nos Estados Unidos
 
-* *Endividamento/Estrutura:* Dívida Total/Ativo, Dívida de Longo Prazo/Ativo e Valor de Mercado sobre Passivo Total.
+As métricas abaixo são do holdout americano registrado nos resultados atuais. Elas medem desempenho dentro do mercado de origem, não transferibilidade para o Brasil.
 
-* *Eficiência/Atividade:* Giro do Ativo e razões de custos operacionais sobre faturamento.
+| Dados | Modelo | Acurácia | Precisão | Recall | AUC-ROC |
+|---|---|---:|---:|---:|---:|
+| Tratados | Regressão Logística | 0,6056 | 0,0950 | 0,5798 | 0,6279 |
+| Tratados | Random Forest | 0,8742 | 0,2160 | 0,3410 | 0,7758 |
+| Tratados | XGBoost | 0,7412 | 0,1545 | 0,6488 | 0,7714 |
+| Brutos | Regressão Logística | 0,4026 | 0,0846 | 0,8148 | 0,6772 |
+| Brutos | Random Forest | 0,8771 | 0,2434 | 0,4042 | 0,7967 |
+| Brutos | XGBoost | 0,7411 | 0,1571 | 0,6648 | 0,7839 |
 
-* **Tratamento Numérico:** Realizou-se tratamento de infinitos ($\pm\infty$) decorrentes de denominadores nulos, imputação pela mediana, truncamento de valores extremos (*Winsorization* nos percentis 1% e 99%) e padronização com `RobustScaler`.
+Os dados brutos tiveram AUC e recall maiores nos três modelos neste holdout; o Random Forest bruto obteve a maior AUC (0,7967), e a Regressão Logística bruta, o maior recall (0,8148), mas com muitos falsos positivos. A comparação usa as mesmas 23.605 observações de teste e os mesmos rótulos para ambas as representações. A escolha do modelo depende do custo relativo de falsos negativos e falsos positivos; acurácia isolada é insuficiente diante do desbalanceamento.
 
-## 2. Modelagem e Estratégia Experimental
+## 3. Experimento cross-market: Estados Unidos → Brasil
 
-* **Divisão Estratificada (*Hold-out* 70/30):** Partição preservando a taxa natural de eventos de falência (~$6{,}63\%$) no conjunto de teste ($23.605$ instâncias não vistas).
-* **Tratamento de Desbalanceamento:** Aplicação da técnica **SMOTE** (*Synthetic Minority Over-sampling Technique*) restrita ao conjunto de treinamento para evitar vazamento de dados (*data leakage*).
+O script `cross_market.py` separa 30% da base americana estratificada e treina com os 70% restantes. O pré-processamento é ajustado no treino americano e aplicado à base brasileira; o SMOTE é restrito ao treino americano. Portanto, o treinamento é exclusivamente americano, mas não usa 100% das linhas americanas.
 
-* **Modelos Desenvolvidos:**
-1. *Regressão Logística (Logit):* Modelo paramétrico tradicional de linha de base (*baseline*).
+A base brasileira contém 1.850 observações, das quais 180 estão rotuladas como falidas. O modelo não usa esses rótulos para treinamento, mas o script os usa para calcular métricas de validação externa. Assim, o experimento é uma avaliação cross-market rotulada, não apenas uma geração cega de scores.
 
-2. *Random Forest:* Ensemble por agregação (*bagging*) com ajuste de pesos de classes.
+| Modelo | Acurácia | Precisão | Recall | AUC-ROC | Falências detectadas | Alarmes falsos |
+|---|---:|---:|---:|---:|---:|---:|
+| Regressão Logística | 0,5670 | 0,1045 | 0,4556 | 0,4984 | 82/180 | 703 |
+| Random Forest | 0,9049 | 0,5667 | 0,0944 | 0,7260 | 17/180 | 13 |
+| XGBoost | 0,8173 | 0,2238 | 0,3556 | 0,7027 | 64/180 | 222 |
 
-3. *XGBoost:* Algoritmo de *gradient boosting* otimizado com ponderação de penalidades para a classe minoritária e grade de hiperparâmetros regularizadores (`gamma`, `reg_lambda`, `reg_alpha`, `min_child_weight`).
+O Random Forest obteve a maior AUC brasileira (0,7260) e poucos alarmes falsos, mas detectou apenas 17 das 180 falências no limiar atual de 0,5. O XGBoost detectou 64 falências, com 222 alarmes falsos. A Regressão Logística teve AUC de 0,4984, próxima ao acaso, apesar de identificar mais casos nesse limiar e gerar muitos falsos positivos. A acurácia de 0,9049 do Random Forest, portanto, não representa boa detecção da classe minoritária.
 
-## 3. Avaliação de Desempenho e Resultados do Benchmark
+Os resultados indicam transferibilidade parcial e dependente do modelo e do limiar, não uma transferência robusta já demonstrada. Os artefatos estão em `results_cross_market/` e os modelos cross-market em `models/`.
 
-A avaliação no conjunto de teste revelou clara superioridade das arquiteturas em ensemble sobre a abordagem linear:
+## 4. Próximos passos
 
-* **XGBoost (Modelo Campeão):** Atingiu a maior capacidade discriminativa global (**AUC-ROC = 0,7846**) e o maior **Recall de Falência (60,41%)**, capturando $946$ das $1.566$ falências reais no teste. Na gestão de risco de crédito, a maximização do Recall é o critério mais relevante, pois minimiza o Erro Tipo II (não identificar a insolvência).
-* **Random Forest:** Apresentou acurácia geral elevada ($87,56\%$) e maior precisão ($21,85\%$), porém demonstrou sensibilidade inferior (**Recall = 33,97%**), deixando passar $1.034$ casos de falência.
-* **Regressão Logística:** Teve o desempenho mais fraco (**AUC-ROC = 0,6278**), comprovando a ineficácia de funções lineares rígidas para separar relações complexas e não lineares nos balanços.
-
----
-
-## 4. Estudo Comparativo: Dados Tratados (Rácios) vs. Dados Brutos (*Untreated*)
-
-Para verificar se a criação dos parâmetros financeiros realmente agregou valor, foi conduzido um experimento paralelo treinando os mesmos algoritmos diretamente nas variáveis brutas ($X_1$ a $X_{18}$):
-
-* **O Falso Ganho nos Dados Brutos:** Embora os dados brutos tenham apresentado AUC marginalmente superior no XGBoost ($0{,}7997$ vs. $0{,}7846$), o gráfico de explicabilidade **SHAP** comprovou que isso se deu por um atalho estatístico (*shortcut learning*): o modelo dependia exclusivamente do `market_value` absoluto em dólares, ignorando indicadores contábeis essenciais.
-* **Colapso da Regressão Logística Bruta:** Devido à severa multicolinearidade entre variáveis nominais de balanço (correlações acima de $0{,}90$), o modelo bruto gerou **$14.407$ falsos alarmes** (classificou $65\%$ da base como falida). A criação dos rácios reduziu os falsos positivos para $8.687$ (uma eliminação de **$5.720$ alarmes falsos**), estabilizando o estimador estatístico.
-* **Invariância de Escala:** A criação dos parâmetros adimensionais provou ser indispensável: sem eles, seria matematicamente impossível transferir o modelo norte-americano para empresas brasileiras cotadas em Reais (R$) e com portes de capital substancialmente menores.
-
-## 5. Explicabilidade (XAI via SHAP e *Feature Importance*)
-
-A análise do XGBoost via valores SHAP forneceu respaldo empírico alinhado à teoria contábil:
-
-1. **Solvência de Mercado (`market_val_to_liabilities`):** Foi a variável mais determinante; baixos valores dessa razão disparam a probabilidade marginal de falência.
-2. **Capacidade Operacional (`EBIT_to_assets` e `gross_margin`):** Apontados como gatilhos primários de deterioração: empresas com margens comprimidas e retornos operacionais negativos deslocam-se consistentemente para a faixa de insolvência.
-3. **Alavancagem de Longo Prazo (`long_term_debt_to_assets`):** Relação diretamente proporcional com o risco de crédito, confirmando a teoria clássica de insolvência por excesso de endividamento oneroso.
-
-## 6. Próximo Passo
-
-Com os modelos calibrados, validados e serializados em disco, o pipeline entra em sua fase final: **Módulo 4 (Transferibilidade *Cross-Market*)**, no qual os demonstrativos contábeis das companhias brasileiras (B3/CVM) serão ingeridos para geração do *score* probabilístico de risco e classificação de insolvência sem a necessidade de rótulo local prévio.
+1. Investigar a ausência de `market_value` na base brasileira e comparar o experimento com essa variável removida, em vez de tratá-la como se seu valor fosse conhecido.
+2. Avaliar limiares de classificação usando apenas validação americana e então aplicá-los ao Brasil; não escolher o limiar com base nos rótulos brasileiros se o objetivo for medir generalização sem adaptação.
+3. Persistir junto aos modelos os parâmetros de pré-processamento e os scores por empresa para tornar a predição reproduzível.
+4. Documentar as diferenças entre validação interna americana e validação externa brasileira, incluindo recall, precisão, AUC e matriz de confusão, e revisar as métricas após cada nova execução dos pipelines.
